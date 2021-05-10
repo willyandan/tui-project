@@ -1,31 +1,26 @@
 import { inject, injectable } from 'inversify'
 import { IHotel } from '../../../domain/entity/Hotel'
 import { HttpMethods } from '../../../domain/entity/request/HttpMethods'
-import { SearchHotelsRequest } from '../../../domain/entity/request/SearchHotelsRequest'
+import { SearchHotelsDto } from '../../../domain/useCase/SearchHotelUseCase/SearchHotelsDTO'
 import { IResponse } from '../../../domain/entity/response/IResponse'
 import { PaginatedResponse } from '../../../domain/entity/response/PaginatedResponse'
-import { SearchHotelUseCase } from '../../../domain/useCase/SearchHotelUseCase'
+import { SearchHotelUseCase } from '../../../domain/useCase/SearchHotelUseCase/SearchHotelUseCase'
 import { IRoute } from '../IRoute'
 import { BaseRoute } from './BaseRoute'
+import { PaginationMiddleware } from '../../middleware/impl/PaginationMiddleware'
 
 @injectable()
-export class SearchHotels extends BaseRoute<SearchHotelsRequest, PaginatedResponse<IHotel>> {
+export class SearchHotels extends BaseRoute<PaginatedResponse<IHotel>> {
 	path = '/api/hotel/search'
 	method = HttpMethods.GET
+	middlewares = [new PaginationMiddleware()]
 
 	@inject(SearchHotelUseCase)
 	private searchHotelUseCase!: SearchHotelUseCase;
 
-	validate(){
-		super.validate(new SearchHotelsRequest())
-	}
-
 	async execute():Promise<IResponse<PaginatedResponse<IHotel>>> {
-		if(!this.request){
-			throw new Error('bad request')
-		}
-		const response = await this.searchHotelUseCase.execute(this.request)
-		//@TODO Retornar useCase de buscas
+		const searchHotelDto = await this.requestToUseCaseDto<SearchHotelsDto>(SearchHotelsDto)
+		const response = await this.searchHotelUseCase.execute(searchHotelDto)
 		return {
 			statusCode:200, 
 			body:response
