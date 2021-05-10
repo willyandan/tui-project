@@ -2,12 +2,16 @@ import { Document, model, Model, Schema } from "mongoose";
 
 export interface IHotel extends Document{
 	type:string;
+	location:{
+		type:string,
+		coordinates:Array<number>
+	}
 	hotel:{
 		type:string;
 		hotelId:string;
 		chainCode:string;
 		dupeId:string;
-		rating:string;
+		rating:number;
 		cityCode:string;
 		latitude:number;
 		longitude:number;
@@ -40,19 +44,30 @@ export interface IHotel extends Document{
 		}
 		price:{
 			currency:string;
-			base:string;
-			total:string;
+			base:number;
+			total:number;
 		}
 	}>;
 	self:string;
 }
 const HotelSchema = new Schema({
 	type:{type:String},
+	location:{
+		type:{
+			type:String,
+			enum:['Point'],
+			required:true
+		},
+		coordinates:{
+			type:[Number],
+			required:true
+		}
+	},
 	hotel:{
 		hotelId:String,
 		chainCode:String,
 		dupeId:String,
-		rating:String,
+		rating:Number,
 		cityCode:String,
 		latitude:Number,
 		longitude:Number,
@@ -85,8 +100,8 @@ const HotelSchema = new Schema({
 		},
 		price:{
 			currency:String,
-			base:String,
-			total:String
+			base:Number,
+			total:Number
 		}
 	}],
 	self:String
